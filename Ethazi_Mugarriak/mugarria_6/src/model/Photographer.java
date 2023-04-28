@@ -1,5 +1,7 @@
 package model;
 
+import java.awt.*;
+
 public class Photographer {
     private int photographerId;
     private String name;

@@ -1,14 +1,15 @@
+import dbconnection.DBCrud;
+import dbconnection.DBHelper;
 import model.Photographer;
 import model.Picture;
 import org.jdesktop.swingx.JXDatePicker;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Date;
 import java.util.List;
 
 public class PictureViewer extends JFrame {
-    private JComboBox<Photographer> photographerComboBox;
+    private JComboBox<String> photographerComboBox;
     private JXDatePicker datePicker;
     private JList<Picture> pictureList;
     private JLabel pictureLabel;
@@ -30,6 +31,8 @@ public class PictureViewer extends JFrame {
 
         JPanel photographerPanel = new JPanel();
         photographerComboBox.setPreferredSize(new Dimension(150,25));
+        this.loadComboBox();
+
         photographerPanel.add(new JLabel("Photographer: "));
         photographerPanel.add(photographerComboBox);
 
@@ -52,12 +55,18 @@ public class PictureViewer extends JFrame {
         add(pictureListPanel);
 
 
+
         pack();
         setVisible(true);
     }
 
-    private void photographersComboBox(){
-        JComboBox<Photographer> comboBox = new JComboBox<>();
+    private void loadComboBox(){
+        DBCrud c = new DBCrud(DBHelper.getConnection());
+        List<Photographer> photographerNames = c.getPhotographers();
+
+        for (Photographer p: photographerNames){
+            photographerComboBox.addItem(p.getName());
+        }
     }
 
     /*
@@ -73,5 +82,6 @@ public class PictureViewer extends JFrame {
 
     public static void main(String[] args) {
         new PictureViewer();
+
     }
 }
