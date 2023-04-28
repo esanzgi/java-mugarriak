@@ -13,7 +13,6 @@ public class DBHelper {
 
     public static Connection getConnection(){
         try{
-            //Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(URL,USER,PASSWORD);
             System.out.println("Conected with MYSQL database");
 
