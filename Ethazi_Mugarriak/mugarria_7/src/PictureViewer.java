@@ -1,6 +1,5 @@
 import dbconnection.DBCrud;
 import dbconnection.DBHelper;
-import model.Photographer;
 import model.Picture;
 import org.jdesktop.swingx.JXDatePicker;
 
@@ -40,6 +39,7 @@ public class PictureViewer extends JFrame {
         removeButton = new JButton("REMOVE");
 
         awardButton.addActionListener(e -> awardPhotographersWithMinimumVisits());
+        removeButton.addActionListener(e -> removePicturesWithoutVisits());
 
         JPanel photographerPanel = new JPanel();
         photographerComboBox.setPreferredSize(new Dimension(150,25));
@@ -90,8 +90,8 @@ public class PictureViewer extends JFrame {
     }
 
     private void loadPhotographersComboBox(){
-        DBCrud c = new DBCrud(DBHelper.getConnection());
-        List<String> photographerNames = c.getPhotographerNames();
+        DBCrud db = new DBCrud(DBHelper.getConnection());
+        List<String> photographerNames = db.getPhotographerNames();
 
         for (String p: photographerNames){
             photographerComboBox.addItem(p);
@@ -99,7 +99,7 @@ public class PictureViewer extends JFrame {
     }
 
     private void loadPictureList(String photographerName){
-        DBCrud c = new DBCrud(DBHelper.getConnection());
+        DBCrud db = new DBCrud(DBHelper.getConnection());
 
         DefaultListModel<String> pictureTitles = new DefaultListModel<>();
 
@@ -107,9 +107,9 @@ public class PictureViewer extends JFrame {
             SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
             String newDate = formatDate.format(datePicker.getDate());
 
-            pictures = c.getPicuresByPhotographerAndDate(photographerName, newDate);
+            pictures = db.getPicuresByPhotographerAndDate(photographerName, newDate);
         }else{
-            pictures = c.getPicuresByPhotographer(photographerName);
+            pictures = db.getPicuresByPhotographer(photographerName);
         }
 
         for (Picture p: pictures){
@@ -127,12 +127,32 @@ public class PictureViewer extends JFrame {
 
     private void awardPhotographersWithMinimumVisits() {
         int minimumVisits = Integer.parseInt(JOptionPane.showInputDialog("Minimum no of visits for getting a prize"));
-        DBCrud c = new DBCrud(DBHelper.getConnection());
+        DBCrud db = new DBCrud(DBHelper.getConnection());
 
-        for (Map.Entry<Integer, Integer> entry: c.createVisitsMap().entrySet()){
+        for (Map.Entry<Integer, Integer> entry: db.createVisitsMap().entrySet()){
             if(minimumVisits <=  entry.getValue()){
                 //System.out.println(entry.getKey());
                 //update erabili gabe awarded true mysql-n
+            }
+        }
+    }
+
+    private void removePicturesWithoutVisits() {
+        DBCrud db = new DBCrud(DBHelper.getConnection());
+        List<Integer> photographerId = db.getPhotographersNotAwarded();
+        if(photographerId.size()==0){
+            JOptionPane.showMessageDialog(null, "Pictures to delete not available!");
+        }
+
+        for (Integer id: photographerId){
+            for(Map.Entry<Integer,String> entry: db.getPicturesWithoutVisitsMap(id).entrySet()){
+                int choice = JOptionPane.showConfirmDialog(null,"Do you want to remove the picture "+entry.getValue()+" ?");
+                if(choice == JOptionPane.YES_OPTION){
+                    db.removePicture(entry.getKey());
+                    if(!db.getPhotographerHasPictures(id)){
+                        db.removePhotographerWithoutPictures(id);
+                    }
+                }
             }
         }
     }
