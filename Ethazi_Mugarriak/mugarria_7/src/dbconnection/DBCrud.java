@@ -1,6 +1,5 @@
 package dbconnection;
 
-import model.Photographer;
 import model.Picture;
 
 import java.sql.*;
@@ -22,6 +21,7 @@ public class DBCrud {
     private static final String REMOVE_PICTURE_BY_ID = "DELETE FROM Pictures WHERE pictureId = ?";
     private static final String REMOVE_PHOTOGRAPHER_WITHOUT_PICTURES = "DELETE FROM Photographers WHERE photographerId = ?";
     private static final String GET_PHOTOGRAPHER_HAS_PICTURES  = "SELECT count(photographerId) FROM Pictures WHERE photographerId = ?";
+    private static final String UPDATE_PHOTOGRAPHER_AWARDED = "UPDATE Photographers SET awarded = ? WHERE photographerId = ?";
 
     public DBCrud(Connection conn){
         this.conn = conn;
@@ -203,6 +203,17 @@ public class DBCrud {
         }
     }
 
+
+    public void updatePhotographerAwarded(int photographerId) {
+        try(PreparedStatement st = conn.prepareStatement(UPDATE_PHOTOGRAPHER_AWARDED)) {
+            st.setBoolean(1, true);
+            st.setInt(2, photographerId);
+            int updated = st.executeUpdate();
+            System.out.println(updated+ " column updated");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     private Picture sortuPicture(ResultSet rs) throws SQLException {

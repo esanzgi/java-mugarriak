@@ -131,8 +131,7 @@ public class PictureViewer extends JFrame {
 
         for (Map.Entry<Integer, Integer> entry: db.createVisitsMap().entrySet()){
             if(minimumVisits <=  entry.getValue()){
-                //System.out.println(entry.getKey());
-                //update erabili gabe awarded true mysql-n
+                db.updatePhotographerAwarded(entry.getKey());
             }
         }
     }
